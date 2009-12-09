@@ -10,7 +10,8 @@ class RBF:
 		
 	def set_params(self,new_params):
 		assert new_params.size == self.nparams
-		self.alpha,self.gamma = np.exp(new_params).copy().flatten()#try to unpack np array safely.  
+		# try to unpack np array safely
+		self.alpha,self.gamma = np.exp(new_params).copy().flatten()  
 		
 	def get_params(self):
 		#return np.array([self.alpha, self.gamma])
