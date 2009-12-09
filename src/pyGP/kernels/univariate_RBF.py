@@ -17,17 +17,31 @@ class RBF:
 		return np.log(np.array([self.alpha, self.gamma]))
 		
 	def __call__(self,x1,x2):
+		"""
+		Evaluates the kernel at a set of location pairs
+		
+		Arguments
+		----------
+		x1, x2 : array
+			these are locations at which to evaluate the kernel
+			
+		Notes
+		----------
+		The inputs are n x d arrays where n is the number of locations and d
+		is the dimension of the space. Therefore, the second dimension of 
+		these arrays has to match!
+		"""
 		N1,D1 = x1.shape
 		N2,D2 = x2.shape
 		assert D1==D2, "Vectors must be of matching dimension"
-		#use broadcasting to avoid for loops. 
-		#should be uber fast
-		diff = x1.reshape(N1,1,D1)-x2.reshape(1,N2,D2)
-		diff = self.alpha*np.exp(-np.sum(np.square(diff),-1)*self.gamma)
-		return diff
+		# use broadcasting to avoid for loops. should be uber fast
+		diff = x1.reshape(N1,1,D1) - x2.reshape(1,N2,D2)
+		# evaluate the kernel at each point
+		return self.alpha*np.exp(-np.sum(np.square(diff),-1)*self.gamma)
 		
 	def gradients(self,x1):
-		"""Calculate the gradient of the matrix K wrt the (log of the) free parameters"""
+		"""Calculate the gradient of the matrix K wrt the (log of the) free 
+		parameters"""
 		N1,D1 = x1.shape
 		diff = x1.reshape(N1,1,D1)-x1.reshape(1,N1,D1)
 		diff = np.sum(np.square(diff),-1)
@@ -38,8 +52,9 @@ class RBF:
 		return (dalpha, dgamma)
 		
 	def gradients_wrt_data(self,x1,indexn=None,indexd=None):
-		"""compute the derivative matrix of the kernel wrt the _data_. Crazy
-		This returns a list of matices: each matrix is NxN, and there are N*D of them!"""
+		"""compute the derivative matrix of the kernel wrt the _data_. This 
+		returns a list of matrices: each matrix is NxN, and there are N*D 
+		of them."""
 		N1,D1 = x1.shape
 		diff = x1.reshape(N1,1,D1)-x1.reshape(1,N1,D1)
 		diff = np.sum(np.square(diff),-1)
