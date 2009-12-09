@@ -17,8 +17,10 @@ class full_RBF:
 	def __call__(self,x1,x2):
 		N1,D1 = x1.shape
 		N2,D2 = x2.shape
-		assert D1==D2, "Vectors must be of matching dimension"
-		assert D1==self.dim, "That data does not match the dimensionality of this kernel"
+		assert D1==D2, \
+			"Vectors must be of matching dimension"
+		assert D1==self.dim, \
+			"That data does not match the dimensionality of this kernel"
 		diff = x1.reshape(N1,1,D1)-x2.reshape(1,N2,D2)
 		diff = self.alpha*np.exp(-np.sum(np.square(diff)*self.gammas,-1))
 		return diff
