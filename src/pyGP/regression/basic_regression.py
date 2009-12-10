@@ -2,9 +2,8 @@
 import numpy as np
 import pylab
 from scipy.optimize import fmin, fmin_ncg, fmin_cg
-from scipy import linalg
-from sys import stdout 
-import kernels 
+from scipy import linalg	
+from .. import kernels
 
 class GP:
 	"""A simple GP with optimisation of the hyperparameters via the marginal 
@@ -12,30 +11,41 @@ class GP:
 	hyperparameters (the kernel parameters and the noise parameter). SCG is 
 	used to optimise the parameters (MAP estimate)"""
 	
-	def __init__(self,X,Y,kernel=None,parameter_priors=None):
+	def __init__(self, X=None, Y=None, kernel=None, parameter_priors=None, 
+		beta=0.1):
 		"""
 		Arguments
 		----------
-		X : 
-		
-		Y : 
-		
-		kernel : Kernel object
+		X : array (None)
+			input
+		Y : array (None)
+			observations
+		kernel : Kernel object (None)
 			The covariance function
+		parameter_prior : (None)
+			
+		beta : float (0.1)
 		
-		parameter_prior :
+		Notes
+		----------
+		If you don't supply a kernel then a multivariate squared exponential 
+		kernel will be generated, with the appropriate dimension taken from X.
+		So if you want to use the default kernel, then you must supply some
+		input/observation data.
 		
 		See Also
 		----------
 		pyGP.kernels : for a selection of covariance functions
 		"""
-		
-		self.N = Y.shape[0]
-		self.setX(X)
-		self.setY(Y)
-		
+		if X is not None and Y is not None:
+			self.N = Y.shape[0]
+			self.setY(Y)
+			self.setX(X)
+		else:
+			raise ValueError('/both/ X and Y must be specified')
+			
 		if kernel==None:
-			self.kernel = kernels.RBF_full(-1,-np.ones(self.Xdim))
+			self.kernel = kernels.full_RBF(-1,-np.ones(self.Xdim))
 		else:
 			self.kernel = kernel
 		if parameter_priors==None:
@@ -43,7 +53,7 @@ class GP:
 		else:
 			assert parameter_priors.size==(self.kernel.nparams+1)
 			self.parameter_prior_widths = np.array(parameter_priors).flatten()
-		self.beta=0.1
+		self.beta=beta
 		self.update()
 		# constant in the marginal. precompute for convenience. 
 		self.n2ln2pi = 0.5*self.Ydim*self.N*np.log(2*np.pi) 
@@ -103,7 +113,7 @@ class GP:
 		self.kernel.set_params(params[:-1])
 		
 	def ll(self,params=None):
-		"""  A cost function to optimise for setting the kernel parameters. 
+		"""A cost function to optimise for setting the kernel parameters. 
 		Uses current parameter values if none are passed """
 		if not params == None:
 			self.set_params(params)
@@ -173,7 +183,8 @@ class GP:
 		
 	def marginal(self):
 		"""The Marginal Likelihood. Useful for optimising Kernel parameters"""
-		return -self.Ydim*np.sum(np.log(np.diag(self.L))) - 0.5*np.trace(np.dot(self.Y.T,self.A)) - self.n2ln2pi
+		return -self.Ydim*np.sum(np.log(np.diag(self.L)))\
+		 	- 0.5*np.trace(np.dot(self.Y.T,self.A)) - self.n2ln2pi
 
 	def predict(self,x_star):
 		"""Make a prediction upon new data points"""
@@ -189,34 +200,15 @@ class GP:
 		means += self.ymean
 		
 		v = np.linalg.solve(self.L,k_x_star_x.T)
-		variances = (np.diag( 
-			k_x_star_x_star - np.dot(v.T,v)
+		variances = (
+			np.diag( 
+				k_x_star_x_star - np.dot(v.T,v)
 			).reshape(x_star.shape[0],1) + 1./self.beta
 		) * self.ystd.reshape(1,self.Ydim)
 		return means,variances
-
-if __name__=='__main__':
-	#generate data:
-	Ndata = 50
-	X = np.linspace(-3,3,Ndata).reshape(Ndata,1)
-	Y = np.sin(X) + np.random.standard_normal(X.shape)/20
 	
-	#create GP object
-	myGP = GP(X,Y)#,kernels.linear(-1,-1))
-	
-	#stuff for plotting
-	xx = np.linspace(-4,4,200).reshape(200,1)
-	def plot():
-		pylab.figure()
-		pylab.plot(X,Y,'r.')
-		yy,cc = myGP.predict(xx)
-		pylab.plot(xx,yy,scaley=False)
-		pylab.plot(xx,yy + 2*np.sqrt(cc),'k--',scaley=False)
-		pylab.plot(xx,yy - 2*np.sqrt(cc),'k--',scaley=False)
-
-	plot()
-	myGP.find_kernel_params()
-	plot()
-	
-
-	pylab.show()
+	def sample(self,X):
+		mean, variance = self.predict(X)
+		v = np.linalg.solve(self.L,self.kernel(X,self.X).T)
+		covariance = (self.kernel(X,X) - np.dot(v.T,v))
+		return np.random.multivariate_normal(mean.flatten(),covariance)
