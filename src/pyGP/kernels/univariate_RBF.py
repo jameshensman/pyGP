@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import numpy as np
+
 class RBF:
 	"""Radial Basis Funcion (or 'Squared Exponential') kernel, with the same scale in all directions...
 	k(x_i,x_j) = \alpha \exp \{ -\gamma ||x_1-x_2||^2 \}
@@ -14,7 +16,7 @@ class RBF:
 		self.alpha,self.gamma = np.exp(new_params).copy().flatten()  
 		
 	def get_params(self):
-		#return np.array([self.alpha, self.gamma])
+		# return np.array([self.alpha, self.gamma])
 		return np.log(np.array([self.alpha, self.gamma]))
 		
 	def __call__(self,x1,x2):
@@ -32,13 +34,19 @@ class RBF:
 		is the dimension of the space. Therefore, the second dimension of 
 		these arrays has to match!
 		"""
-		N1,D1 = x1.shape
-		N2,D2 = x2.shape
+		if len(x1.shape)>1:
+			N1,D1 = x1.shape
+			N2,D2 = x2.shape
+		else:
+			N1,D1 = x1.shape[0],1
+			N2,D2 = x2.shape[0],1
+			
 		assert D1==D2, "Vectors must be of matching dimension"
 		# use broadcasting to avoid for loops. should be uber fast
 		diff = x1.reshape(N1,1,D1) - x2.reshape(1,N2,D2)
 		# evaluate the kernel at each point
-		return self.alpha*np.exp(-np.sum(np.square(diff),-1)*self.gamma)
+		K = self.alpha*np.exp(-np.sum(np.square(diff),-1)*self.gamma)
+		return K
 		
 	def gradients(self,x1):
 		"""Calculate the gradient of the matrix K wrt the (log of the) free 
