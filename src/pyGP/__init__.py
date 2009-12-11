@@ -1,2 +1,2 @@
-import kernels
-import regression
+from kernels import *
+from regression import *

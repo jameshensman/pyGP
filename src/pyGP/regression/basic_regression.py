@@ -12,7 +12,7 @@ class GP:
 	used to optimise the parameters (MAP estimate)"""
 	
 	def __init__(self, X=None, Y=None, kernel=None, parameter_priors=None, 
-		beta=0.1):
+		beta=0.1, prior_mean=None):
 		"""
 		Arguments
 		----------
@@ -37,12 +37,10 @@ class GP:
 		----------
 		pyGP.kernels : for a selection of covariance functions
 		"""
-		if X is not None and Y is not None:
+		if (X is not None) and (Y is not None):
 			self.N = Y.shape[0]
 			self.setY(Y)
 			self.setX(X)
-		else:
-			raise ValueError('/both/ X and Y must be specified')
 			
 		if kernel==None:
 			self.kernel = kernels.full_RBF(-1,-np.ones(self.Xdim))
@@ -53,10 +51,16 @@ class GP:
 		else:
 			assert parameter_priors.size==(self.kernel.nparams+1)
 			self.parameter_prior_widths = np.array(parameter_priors).flatten()
+		if prior_mean is None:
+			self.prior_mean = lambda X: pb.zeros(len(X))
+		else:
+			self.prior_mean = prior_mean
+			
 		self.beta=beta
-		self.update()
-		# constant in the marginal. precompute for convenience. 
-		self.n2ln2pi = 0.5*self.Ydim*self.N*np.log(2*np.pi) 
+		if (X is not None) and (Y is not None):
+			self.update()
+			# constant in the marginal. precompute for convenience. 
+			self.n2ln2pi = 0.5*self.Ydim*self.N*np.log(2*np.pi) 
 
 	def setX(self,newX):
 		"""
@@ -208,7 +212,11 @@ class GP:
 		return means,variances
 	
 	def sample(self,X):
-		mean, variance = self.predict(X)
-		v = np.linalg.solve(self.L,self.kernel(X,self.X).T)
-		covariance = (self.kernel(X,X) - np.dot(v.T,v))
+		if hasattr(self,'X'):
+			mean, variance = self.predict(X)
+			v = np.linalg.solve(self.L,self.kernel(X,self.X).T)
+			covariance = (self.kernel(X,X) - np.dot(v.T,v))
+		else:
+			mean = self.prior_mean(X)
+			covariance = self.kernel(X,X)
 		return np.random.multivariate_normal(mean.flatten(),covariance)

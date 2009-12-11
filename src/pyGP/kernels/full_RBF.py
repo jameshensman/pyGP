@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+import numpy as np
+
 class full_RBF:
 	def __init__(self,alpha,gammas):
 		self.gammas = np.exp(gammas.flatten())
-		self.dim = gammas.size
+		self.dim = gammas.shape[0]
 		self.alpha = np.exp(alpha)
 		self.nparams = self.dim+1
 		

@@ -1,1 +1,1 @@
-from basic_regression import * 
+from basic_regression import GP
