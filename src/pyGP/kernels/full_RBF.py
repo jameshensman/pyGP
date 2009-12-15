@@ -32,9 +32,11 @@ class full_RBF:
 		N1,D1 = x1.shape
 		diff = x1.reshape(N1,1,D1)-x1.reshape(1,N1,D1)
 		sqdiff = np.sum(np.square(diff)*self.gammas,-1)
-		expdiff = np.exp(-sqdiff)
-		grads = [-g*np.square(diff[:,:,i])*self.alpha*expdiff for i,g in enumerate(self.gammas)]
-		grads.insert(0, self.alpha*expdiff)
+		expdiff = self.alpha*np.exp(-sqdiff)
+		grads = np.zeros((self.nparams,N1,N1))
+		grads[0,:,:] = expdiff
+		for i,g in enumerate(self.gammas):
+			grads[i+1,:,:] = -g*np.square(diff[:,:,i])*expdiff
 		return grads
 	
 	def gradients_wrt_data(self,x1,indexn=None,indexd=None):
