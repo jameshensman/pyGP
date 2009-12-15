@@ -61,7 +61,10 @@ class GP:
 			self.update()
 			# constant in the marginal. precompute for convenience. 
 			self.n2ln2pi = 0.5*self.Ydim*self.N*np.log(2*np.pi) 
-
+			
+		#constant in the kernel parameter prior. precompute for convenience
+		self.prior_const = -0.5*(self.kernel.nparams+1)*np.log(2*np.pi) - 0.5*np.log(np.prod(self.parameter_prior_widths))
+		
 	def setX(self,newX):
 		"""
 		zero means and normalises X
@@ -98,8 +101,8 @@ class GP:
 		
 	def hyper_prior(self):
 		"""return the log of the current hyper paramters under their prior"""
-		return -0.5*np.dot(self.parameter_prior_widths,np.square(self.get_params()))
-	
+		return  self.prior_const - 0.5*np.dot(self.parameter_prior_widths,np.square(self.get_params()))
+			
 	def hyper_prior_grad(self):
 		"""return the gradient of the (log of the) hyper prior for the current
 		parameters"""
