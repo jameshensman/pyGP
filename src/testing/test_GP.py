@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 import numpy as np
 import pylab as pb
@@ -22,15 +23,12 @@ def plot():
 	pb.plot(xx,yy,scaley=False)
 	pb.plot(xx,yy + 2*np.sqrt(cc),'k--',scaley=False)
 	pb.plot(xx,yy - 2*np.sqrt(cc),'k--',scaley=False)
+	# draw some samples
+	for i in range(4):
+		pb.plot(xx,myGP.sample(xx),scaley=False,alpha=0.3)
 
 plot()
-# draw some samples
-for i in range(4):
-	pb.plot(xx,myGP.sample(xx),scaley=False,alpha=0.3)
 myGP.find_kernel_params()
 plot()
-# draw some samples
-for i in range(4):
-	pb.plot(xx,myGP.sample(xx),scaley=False,alpha=0.3)
 pb.show()
 	

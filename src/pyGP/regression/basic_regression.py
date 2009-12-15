@@ -52,7 +52,7 @@ class GP:
 			assert parameter_priors.size==(self.kernel.nparams+1)
 			self.parameter_prior_widths = np.array(parameter_priors).flatten()
 		if prior_mean is None:
-			self.prior_mean = lambda X: pb.zeros(len(X))
+			self.prior_mean = lambda X: np.zeros(len(X))
 		else:
 			self.prior_mean = prior_mean
 			
@@ -214,8 +214,9 @@ class GP:
 	def sample(self,X):
 		if hasattr(self,'X'):
 			mean, variance = self.predict(X)
-			v = np.linalg.solve(self.L,self.kernel(X,self.X).T)
-			covariance = (self.kernel(X,X) - np.dot(v.T,v))
+			X2 = (X-self.xmean)/self.xstd # normalised version of points to sample
+			v = np.linalg.solve(self.L,self.kernel(X2,self.X).T)
+			covariance = (self.kernel(X2,X2) - np.dot(v.T,v))
 		else:
 			mean = self.prior_mean(X)
 			covariance = self.kernel(X,X)
