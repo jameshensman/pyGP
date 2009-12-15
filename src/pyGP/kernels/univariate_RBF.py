@@ -23,7 +23,7 @@ class RBF:
 		"""
 		Evaluates the kernel at a set of location pairs
 		
-		Arguments
+		Parameters
 		----------
 		x1, x2 : array
 			these are locations at which to evaluate the kernel

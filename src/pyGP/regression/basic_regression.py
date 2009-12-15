@@ -14,7 +14,7 @@ class GP:
 	def __init__(self, X=None, Y=None, kernel=None, parameter_priors=None, 
 		beta=0.1, prior_mean=None):
 		"""
-		Arguments
+		Parameters
 		----------
 		X : array (None)
 			input
@@ -69,7 +69,7 @@ class GP:
 		"""
 		zero means and normalises X
 		
-		Arguments
+		Parameters
 		----------
 		newX :
 		"""
@@ -86,7 +86,7 @@ class GP:
 		"""
 		zero means and normalises Y
 		
-		Arguments
+		Parameters
 		----------
 		newY :
 		"""
@@ -152,7 +152,7 @@ class GP:
 		"""
 		Optimise the marginal likelihood.
 		
-		Arguments
+		Parameters
 		----------
 		iters : int (1000)
 			number of iterations to use in optimisation
