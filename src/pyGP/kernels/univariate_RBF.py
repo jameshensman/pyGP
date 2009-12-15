@@ -54,11 +54,9 @@ class RBF:
 		N1,D1 = x1.shape
 		diff = x1.reshape(N1,1,D1)-x1.reshape(1,N1,D1)
 		diff = np.sum(np.square(diff),-1)
-		#dalpha = np.exp(-diff*self.gamma)
 		dalpha = self.alpha*np.exp(-diff*self.gamma)
-		#dgamma = -self.alpha*diff*np.exp(-diff*self.gamma)
 		dgamma = -self.alpha*self.gamma*diff*np.exp(-diff*self.gamma)
-		return (dalpha, dgamma)
+		return np.array([dalpha, dgamma])
 		
 	def gradients_wrt_data(self,x1,indexn=None,indexd=None):
 		"""compute the derivative matrix of the kernel wrt the _data_. This 
