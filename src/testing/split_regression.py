@@ -12,7 +12,7 @@ class split_kernel_1D:
 		
 		Notes
 		----------
-		This only works for 1D at the momentm and the regions are defined by a split-point. higher dimensional versions are possible in future..."""
+		This only works for 1D at the moment and the regions are defined by a split-point. higher dimensional versions are possible in future..."""
 		
 		self.k = pyGP.kernels.RBF(ln_alpha,ln_gamma)
 		self.split = split

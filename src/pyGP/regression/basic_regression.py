@@ -116,7 +116,7 @@ class GP:
 	def set_params(self,params):
 		""" set the kernel parameters and the noise parameter beta"""
 		assert params.size==self.kernel.nparams+1
-		self.beta = np.exp(params[-1])
+		self.beta = np.exp(params[-1]).real
 		self.kernel.set_params(params[:-1])
 		
 	def ll(self,params=None):
@@ -174,7 +174,7 @@ class GP:
 	def update(self):
 		"""do the Cholesky decomposition as required to make predictions and 
 		calculate the marginal likelihood"""
-		self.K = self.kernel(self.X,self.X) 
+		self.K = self.kernel(self.X,self.X)  
 		self.K += np.eye(self.K.shape[0])/self.beta
 		self.L = np.linalg.cholesky(self.K)
 		self.A = linalg.cho_solve((self.L,1),self.Y)

@@ -12,7 +12,7 @@ X = np.linspace(-3,3,Ndata).reshape(Ndata,1)
 Y = np.sin(X) + np.random.standard_normal(X.shape)/20
 
 #create GP object
-myGP = pyGP.GP(X,Y)#,kernels.linear(-1,-1))
+myGP = pyGP.regression.basic(X,Y)#,kernels.linear(-1,-1))
 
 #stuff for plotting
 xx = np.linspace(-4,4,200).reshape(200,1)
