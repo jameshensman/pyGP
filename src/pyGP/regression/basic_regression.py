@@ -26,6 +26,9 @@ class GP:
 			
 		beta : float (0.1)
 		
+		prior_mean : function
+			
+		
 		Notes
 		----------
 		If you don't supply a kernel then a multivariate squared exponential 
@@ -101,7 +104,10 @@ class GP:
 		
 	def hyper_prior(self):
 		"""return the log of the current hyper paramters under their prior"""
-		return  self.prior_const - 0.5*np.dot(self.parameter_prior_widths,np.square(self.get_params()))
+		return  self.prior_const - 0.5*np.dot(
+			self.parameter_prior_widths,
+			np.square(self.get_params())
+		)
 			
 	def hyper_prior_grad(self):
 		"""return the gradient of the (log of the) hyper prior for the current
@@ -173,7 +179,8 @@ class GP:
 		
 	def update(self):
 		"""do the Cholesky decomposition as required to make predictions and 
-		calculate the marginal likelihood"""
+		calculate the marginal likelihood
+		"""
 		self.K = self.kernel(self.X,self.X)  
 		self.K += np.eye(self.K.shape[0])/self.beta
 		self.L = np.linalg.cholesky(self.K)
